@@ -35,17 +35,28 @@ def bias_variable(shape):
     return tf.Variable(initial)
 
 
-H = 500
+H1 = 300
+H2 = 300
+C = 0.1
 x = tf.placeholder(tf.float32, [None, 784])
 
 # Nonlinear
-Wij = weight_variable([784, H])
-bj = bias_variable([H])
+Wij = weight_variable([784, H1])
+bj = bias_variable([H1])
 yj = tf.nn.sigmoid(tf.matmul(x, Wij) + bj)
 
-Wjk = weight_variable([H, 10])
-bk = bias_variable([10])
-y = tf.matmul(yj, Wjk) + bk
+Wjk = weight_variable([H1, H2])
+bk = bias_variable([H2])
+yk = tf.nn.sigmoid(tf.matmul(yj, Wjk) + bj)
+
+Wkl = weight_variable([H2, 10])
+bl = bias_variable([10])
+y = tf.matmul(yk, Wkl) + bl
+
+sizeWij = 784 * H1
+sizeWjk = H1 * H2
+sizeWkl = H2 * 10
+sizeW = sizeWij + sizeWjk + sizeWkl
 
 # Linear
 #W = tf.Variable(tf.zeros([784, 10]))
@@ -56,8 +67,10 @@ y = tf.matmul(yj, Wjk) + bk
 y_ = tf.placeholder(tf.float32, [None, 10])
 
 cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
-#train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
-train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+regularization = sizeWij / sizeW * tf.reduce_mean(tf.square(Wij)) + \
+                 sizeWjk / sizeW * tf.reduce_mean(tf.square(Wjk)) + \
+                 sizeWkl / sizeW * tf.reduce_mean(tf.square(Wkl));
+train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy + C * regularization)
 
 sess = tf.InteractiveSession()
 tf.global_variables_initializer().run()
@@ -85,19 +98,20 @@ def add_point(x, y, line):
 
 
 # Train
-for i in range(30000):
+for i in range(50000):
     sample = random.choice(X_train.shape[0], 50, replace=False)
     sess.run(train_step, feed_dict={x: X_train[sample], y_: y_train_oh[sample]})
 
     if i % 1000 == 0:
         train_accuracy = sess.run(accuracy, feed_dict={x: X_train, y_: y_train_oh})
         valid_accuracy = sess.run(accuracy, feed_dict={x: X_valid, y_: y_valid_oh})
+        print('Scores: train', train_accuracy, 'validation', valid_accuracy)
         add_point(i, train_accuracy, train_line)
         add_point(i, valid_accuracy, valid_line)
 
 # Test trained model
-print('Train score:', sess.run(accuracy, feed_dict={x: X_train, y_: y_train_oh}))
-print('Validation score:', sess.run(accuracy, feed_dict={x: X_valid, y_: y_valid_oh}))
+print('Final train score:', sess.run(accuracy, feed_dict={x: X_train, y_: y_train_oh}))
+print('Final validation score:', sess.run(accuracy, feed_dict={x: X_valid, y_: y_valid_oh}))
 
 # Solving for test data
 print('Solving...')
