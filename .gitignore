@@ -1,3 +1,4 @@
 *.csv
+build
 .idea
 __pycache__
