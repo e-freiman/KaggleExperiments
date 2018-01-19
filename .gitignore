@@ -1,4 +1,13 @@
 *.csv
-build
+*.log
+*.dll
+*.o
+.ipynb_checkpoints
 .idea
+input
+build
+*.meta
+generated
+generated.zip
+deployment
 __pycache__

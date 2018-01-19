@@ -1,0 +1,4 @@
+LIBRARY    "gauss"
+
+EXPORTS
+    gauss
