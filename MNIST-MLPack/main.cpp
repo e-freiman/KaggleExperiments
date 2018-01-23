@@ -88,9 +88,9 @@ int main()
   // and validation parts with following ratio.
   constexpr double RATIO = 0.9;
   // The number of neurons in the first layer.
-  constexpr int H1 = 28*28;
+  constexpr int H1 = 100;
   // The number of neurons in the second layer.
-  constexpr int H2 = 28*28;
+  constexpr int H2 = 200;
   
   // The solution is done in several approaches (CYCLES), each approach 
   // uses previous results as starting point and have a different optimizer 
@@ -100,14 +100,14 @@ int main()
   constexpr int ITERATIONS_PER_CYCLE = 5000;
   
   // Number of cycles.
-  constexpr int CYCLES = 100;
+  constexpr int CYCLES = 20;
   
   // Initial step size of an optimizer.
   constexpr double STEP_BEGIN = 1e-2;
   
   // Final step size of an optimizer. Between those two points step size is
   // vary linearly.
-  constexpr double STEP_END = 5e-4;
+  constexpr double STEP_END = 1e-3;
   
   std::cout << "Reading data ..." << std::endl;
   
@@ -182,7 +182,7 @@ int main()
   model.Add<SigmoidLayer<> >();
   // Dropout layer for regularization. First parameter is the probability of
   // setting a specific value to 0.
-  model.Add<Dropout<> >(0.3, true);
+  // model.Add<Dropout<> >(0.3, true);
   // Intermediate layer.
   model.Add<Linear<> >(H2, 10);
   // LogSoftMax layer is used together with NegativeLogLikelihood for mapping
